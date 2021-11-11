@@ -1,0 +1,1 @@
+Junior Design project for 2021/2022. Frisbee tracking device centered around ESP32 uC and a tracking app. Device will be battery powered with tracking centered around Bluetooth, NFC, and potentially gyro + accelerometer data. Estimated completion April/May 2022.
