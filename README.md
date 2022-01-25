@@ -1,0 +1,1 @@
+Junior Design project for 2021/2022. Frisbee tracking device centered around a bluetooth tracking module in a 3D printed chassis attached to a disc, with a smart watch and a tracking app. Device will be battery powered with tracking centered around Bluetooth. Estimated completion April/May 2022.
