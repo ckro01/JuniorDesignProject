@@ -1,18 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".devicePage">
-
+    tools:context=".devicePage"
+    android:orientation="vertical"
+    android:gravity="center">
     <TextView
-        android:id="@+id/textView6"
+        android:gravity="center_horizontal"
+        android:id="@+id/statusBluetoothTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#FFF"
+        android:textSize="20sp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="137dp" />
+
+    <ImageView
+        android:id="@+id/bluetoothIv"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        tools:layout_editor_absoluteX="155dp"
+        tools:layout_editor_absoluteY="276dp" />
+    <Button
+        android:id="@+id/onBtn"
+        android:minWidth="200dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Device List:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:text="Turn On"
+        style="@style/Base.Widget.AppCompat.Button.Colored"/>
+
+    <Button
+        android:id="@+id/discBtn"
+        android:minWidth="200dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bluetooth Discovery"
+        style="@style/Base.Widget.AppCompat.Button.Colored"/>
+    <Button
+        android:id="@+id/pairedBtn"
+        android:minWidth="200dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Paired Devices"
+        style="@style/Base.Widget.AppCompat.Button.Colored"/>
+    <TextView
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/pairedTv"
+        android:minWidth="200dp"
+        android:text=""
+        android:textColor="#FFF"
+        />
+</LinearLayout>

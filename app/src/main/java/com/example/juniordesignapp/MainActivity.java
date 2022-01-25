@@ -2,6 +2,7 @@ package com.example.juniordesignapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.view.View;
 import android.os.Bundle;

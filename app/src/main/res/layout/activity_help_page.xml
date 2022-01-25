@@ -8,11 +8,11 @@
 
     <TextView
         android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="246dp"
+        android:layout_height="90dp"
         android:autoLink="email"
         android:minHeight="48dp"
-        android:text="Contact: filleremail@gmail.com"
+        android:text="Contact: caden.krohn@mnsu.edu\nProject Team: Caden Krohn, Ty Lancaster, Aswathy Ajay"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,25 +20,26 @@
 
     <TextView
         android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="248dp"
+        android:layout_height="147dp"
         android:layout_marginTop="12dp"
-        android:text="Locate: "
+        android:text="Locate: This page displays the active location of the paired device.\nDevice Page: Device management area, pairing, unpairing, Bluetooth settings.\nSettings: General app settings."
         app:layout_constraintStart_toStartOf="@+id/textView4"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
     <TextView
         android:id="@+id/textView9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="197dp"
+        android:layout_height="125dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:text="About:"
+        android:text="About: This app is designed to aid in the location and retrival of lost discs"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.696" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="360dp"
@@ -66,7 +67,7 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/junior_design_app_alpha_0_1"
+            android:text="Junior Design App: Alpha 0.2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

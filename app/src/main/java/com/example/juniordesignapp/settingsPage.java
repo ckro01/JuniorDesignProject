@@ -1,5 +1,7 @@
 package com.example.juniordesignapp;
 
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
