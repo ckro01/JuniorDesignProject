@@ -3,13 +3,17 @@ package com.example.juniordesignapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Set;
 
 public class devicePage extends AppCompatActivity {
 
@@ -50,7 +54,6 @@ public class devicePage extends AppCompatActivity {
         //ensure BT is on
         mOnBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-
             public void onClick(View v) {
                 if (!mBlueAdapter.isEnabled()){
                     Toast.makeText(devicePage.this,"Turning on Bluetooth...",Toast.LENGTH_SHORT).show();
@@ -60,7 +63,6 @@ public class devicePage extends AppCompatActivity {
                     mStatusBlueTv.setText("Bluetooth is on");
                 }
                 else {
-
                     Toast.makeText(devicePage.this,"Bluetooth already enabled... Refreshing",Toast.LENGTH_SHORT).show();
                 }
                 if (mBlueAdapter.isEnabled()) {
@@ -69,11 +71,34 @@ public class devicePage extends AppCompatActivity {
                     startActivity(getIntent());}
             }
         });
-
+        //Paired devices
         mPairedBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (mBlueAdapter.isEnabled()) {
+                    mPairedTv.setText("Paired List:");
+                    Set<BluetoothDevice> devices = mBlueAdapter.getBondedDevices();
+                    int i=0;
+                    for (BluetoothDevice device: devices) {
+                        i++;
+                        mPairedTv.append("\n"+i+": " + device.getName()+" : "+device);
+                    }
+                }
+            }
+        });
+        mDiscoverBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBlueAdapter.isEnabled() && !mBlueAdapter.isDiscovering()) {
+                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                    intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+                    startActivityForResult(intent,REQUEST_DISCOVER_BT);
+                    Toast.makeText(devicePage.this,"Opening Bluetooth Settings...",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(devicePage.this,"Return to the app to make your device discoverable for 5 minutes",Toast.LENGTH_LONG).show();
+                    Intent intentOpenBluetoothSettings= new Intent();
+                    intentOpenBluetoothSettings.setAction(Settings.ACTION_BLUETOOTH_SETTINGS);
+                    startActivity(intentOpenBluetoothSettings);
+                }
             }
         });
 
