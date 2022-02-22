@@ -8,6 +8,8 @@ Libraries Required:
 
 Adafruit NeoPixel
 
+Adafruit Seesaw
+
 Arduino ST-7789: https://github.com/lspoplove/Arduino-ST7789-Library
 
 SPI
