@@ -1,95 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@drawable/frisbeetrackermainmenu"
+    android:orientation="vertical"
+    android:theme="@style/Theme.AppCompat.NoActionBar"
     tools:context=".HomeActivity">
 
+    <Button
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:id="@+id/Locate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="locatePage"
+        android:text="@string/locate"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/teal_200"
+        android:minWidth="200dp" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="180dp"
-        android:layout_height="400dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2">
+    <Button
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/Devices"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/teal_200"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="devicesPage"
+        android:text="Bluetooth \nnformation"
+        android:minWidth="200dp" />
 
-        <Button
-            android:id="@+id/Help"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="helpPage"
-            android:text="@string/about"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Settings" />
+    <Button
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:id="@+id/Settings"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/teal_200"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="settingsPage"
+        android:text="@string/settings"
+        android:minWidth="200dp" />
 
-        <Button
-            android:id="@+id/Settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="settingsPage"
-            android:text="@string/settings"
-            app:layout_constraintBottom_toTopOf="@+id/Help"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Devices" />
+    <Button
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:id="@+id/Help"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/teal_200"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="helpPage"
+        android:text="@string/about"
+        android:minWidth="200dp" />
 
-        <Button
-            android:id="@+id/Locate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="locatePage"
-            android:text="@string/locate"
-            app:layout_constraintBottom_toTopOf="@+id/Devices"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/Devices"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="devicesPage"
-            android:text="Bluetooth management"
-            app:layout_constraintBottom_toTopOf="@+id/Settings"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Locate" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout2"
-        android:layout_width="360dp"
-        android:layout_height="300dp"
-        android:layout_marginBottom="496dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="19dp"
-            android:scaleX="2"
-            android:scaleY="2"
-            android:text="@string/bluetooth_frisbee_tracker"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.84000003" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

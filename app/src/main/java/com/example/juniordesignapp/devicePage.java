@@ -16,17 +16,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Set;
 
 public class devicePage extends AppCompatActivity {
-
     private static final int REQUEST_ENABLE_BT = 0;
     private static final int REQUEST_DISCOVER_BT = 1;
-
-
     TextView mStatusBlueTv, mPairedTv;
     ImageView mBlueIv;
     Button mOnBtn, mDiscoverBtn, mPairedBtn;
     BluetoothAdapter mBTAdapter;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
