@@ -47,7 +47,7 @@ void setup(void) {
   tft.setTextWrap(true);
   tft.println("LOADING");
   delay(100); //maybe do something here, otherwise just allows user to read the loading screen
-  rainbowCycle(2);
+  rainbowCycle(2);    //commented the rainbow out for obvious reasons
   //animation screen
   tft.fillScreen(BLACK);
   base_circle(10, BLUE);
@@ -59,8 +59,38 @@ void setup(void) {
   strip.begin();
   strip.show(); // set all pixels to 'off', saves power
 }
+unsigned long chrono = 0; //Circle variable
 int i = 0; //loop var
 bool flag, select = false; //flag helps the program know not to update the screen repeatedly unless it is pressed again, select will choose whichever menu is hovered over when triggered
+ //program to call when drawing the circle
+bool drawCircle (int centerX, int centerY, int rad, int timeDelay)
+{
+ if (millis() - chrono < 10) return 0;
+ if(timeDelay < 20){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, GREEN);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 40 && timeDelay >= 20){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, YELLOW);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 80 && timeDelay >= 40){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, WHITE);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 120 && timeDelay >= 80){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, RED);
+    delay(timeDelay);
+    return 1;
+  }
+}
 void loop() { //main program loop
   bool newState = digitalRead(BUTTON_PRESS); //deboucing new state
   if (digitalRead(BUTTON_LEFT) == LOW) //moving left
@@ -81,7 +111,7 @@ void loop() { //main program loop
       i++;
     }
   }
-  // Deboucing method, checks for at least 20ms of hold in order to aleviate accidental presses, select wheel main press
+  // Debouncing method, checks for at least 20ms of hold in order to aleviate accidental presses, select wheel main press
   if (newState == LOW && oldState == HIGH) {
     // Short delay to debounce button.
     delay(20);
@@ -92,7 +122,7 @@ void loop() { //main program loop
       Serial.println("select triggered"); //debugging
       soundThree(); //new sound
       colorWipe(strip.Color(0, 0, 255), 50);  // Green
-    colorWipe(strip.Color(0, 0, 0), 50);    // Black/off 
+      colorWipe(strip.Color(0, 0, 0), 50);    // Black/off 
       delay(100);
       page_select(i); //short delay, then select desired page
     }
@@ -171,16 +201,113 @@ void page_select(int i) {
     main_menu();
   }
 }
-void load_track() {
-  //track page here, placeholder code
+void load_track() {  
+  //Track page here
   Serial.println("Loading Track Page");
-  main_menu(); //update to know it selected something, will isntead move the user to the track screen
+  chrono = millis();
+  int d = 4, radius, circleX = 120, circleY = 120, j=0;    //Setting a d variable to act as the distance variable for when we actually have the bluetooth distance working
+  if (d >= 25){
+    while (d >= 25) {         //mulitple functions to display the difference in timing intervals
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 100);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundFour();
+      j++;
+    }
+    j=0;
+  }
+  else if (d < 25 && d >= 10){
+    while (d < 25) {
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 50);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundThree();
+      j++;
+    }
+    j=0;
+  }
+  else if (d < 10 && d >= 5){
+    while (d < 10) {
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 25);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundTwo();
+      j++;
+    }
+    j=0;
+  }
+  else if (d < 5){
+    while (d < 5) {
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 10);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundOne();
+      j++;
+    }
+    j=0;
+  }
+  else{
+    tft.fillScreen(BLACK);
+    tft.setCursor(100, 120);
+    tft.setTextColor(RED);
+    tft.println("ERROR");
+    tft.setTextColor(BLACK);
+  }
+  
 }
-void load_about() {
+void load_about() { 
   //about page here
   Serial.println("Loading About Page");
-  main_menu(); //update to know it selected something, will instead move the user to the about screen
+  tft.fillScreen(BLACK);
+  tft.fillRoundRect(5, 15, 230, 70, 8, CYAN);
+  tft.fillRoundRect(10, 20, 220, 60, 8, WHITE);
+  tft.setCursor(20, 40);
+  tft.setTextColor(BLACK);
+  tft.setTextSize(2);
+  tft.println("About Our Project");
+  tft.fillRoundRect(5, 90, 230, 140, 8, MAGENTA);
+  tft.fillRoundRect(10, 95, 220, 130, 8, WHITE);
+  tft.setCursor(20, 100);
+  tft.setTextColor(BLACK);
+  tft.setTextSize(1.5);
+  tft.println("Our Project is for those who lose");          //For capital letters begin at x = 20, and for lowercase begin at x = 17
+  tft.setCursor(17, 115);
+  tft.println("their discs too much and could use");
+  tft.setCursor(17, 130);
+  tft.println("some extra help. The functionality");
+  tft.setCursor(17, 145);
+  tft.println("of the device is to act as a hot &");
+  tft.setCursor(17, 160);
+  tft.println("cold form of tracking so that");
+  tft.setCursor(20, 175);
+  tft.println("players can save time and money");
+  tft.setCursor(20, 190);
+  tft.println("while enjoying the game of Frolf");
+  tft.setCursor(19, 205);
+  tft.println("Made By: Ty, Ajay and Caden");
+  tft.setTextSize(2);         
 }
+
 //default sound #1
 void soundOne() {
   unsigned char i;
@@ -246,10 +373,32 @@ void soundThree() {
     }
   }
 }
+//default sound #4
+void soundFour() {
+  unsigned char i;
+  for (i = 0; i < 2; i++) {
+    for (i = 0; i < 1; i++)
+    {
+      for (i = 0; i < 12; i++)
+      {
+        digitalWrite(BUZZER, HIGH);
+        delay(1);
+        digitalWrite(BUZZER, LOW);
+        delay(3);
+      }
+      for (i = 0; i < 25; i++)
+      {
+        digitalWrite(BUZZER, HIGH);
+        delay(3);
+        digitalWrite(BUZZER, LOW);
+        delay(1);
+      }
+    }
+  }
+}
 //rainbowCycle,Wheel, colorWipe are all supplied functions from Neopixel
 void rainbowCycle(uint8_t wait) {
   uint16_t i, j;
-
   for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
     for(i=0; i< strip.numPixels(); i++) {
       strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
