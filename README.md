@@ -1,1 +1,1 @@
-Early stages of app development. Bluetooth functionality has been added, and is in the process of being finalized. Basic menu navigation is complete, and a UI will be added after functionality is ensured.
+Mid stages of app development. Bluetooth functionality has been added, and now provides mostly accurate location data. Basic menu navigation is complete and will be polished in the coming months. UI is mostly complete, redundant menu options will be removed. 
