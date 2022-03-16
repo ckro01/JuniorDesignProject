@@ -9,6 +9,16 @@
 #include <Arduino_ST7789.h> // Hardware-specific library for ST7789 (with or without CS pin)
 #include <Adafruit_NeoPixel.h>
 #include <SPI.h>
+#include <Arduino.h>
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
+#include <BLEBeacon.h>
+#include <math.h>
+BLEScan *pBLEScan;
+#define ENDIAN_CHANGE_U16(x) ((((x)&0xFF00) >> 8) + (((x)&0xFF) << 8))
+int scanTime = 1000; //In seconds
 //pin definitions on watch
 #define BUTTON_PRESS   18
 #define BUTTON_LEFT    5
@@ -24,10 +34,54 @@
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
 Arduino_ST7789 tft = Arduino_ST7789(TFT_DC, TFT_RST, TFT_MOSI, TFT_SCLK); //for display without CS pin
 bool oldState = HIGH; //debouce bool
+int d =0;
+
+//distance class, do not touch :)
+//needs to go at the start, proabably best to call the draw method from here as well.
+class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
+{
+    void onResult(BLEAdvertisedDevice advertisedDevice)
+    {
+      if (digitalRead(BUTTON_PRESS) == LOW) {
+      ESP.restart();
+  }
+      if (advertisedDevice.haveName())
+      {
+       std::string devName = advertisedDevice.getName().c_str();
+        if (devName.compare("RDL51822") ==0){
+          Serial.println("\nTracker Found\n");
+          int tmp = advertisedDevice.getRSSI();
+          Serial.println(tmp);
+          float distanceTemp = 1;
+          distanceTemp = (-60 - tmp);
+          double dist = pow(10.0,distanceTemp/40);
+          Serial.print(dist);
+          Serial.print("m");
+          d = int(dist);
+          //plug d into function to draw, also write actual distance to the user off to the side or dead center
+        }
+      }
+      
+
+      uint8_t *payLoad = advertisedDevice.getPayload();
+
+      BLEUUID checkUrlUUID = (uint16_t)0xfeaa;
+    }
+};
+
+
+
 //initialization
 void setup(void) {
   tft.fillScreen(BLACK); //blank screen
   Serial.begin(115200); //init serial
+  BLEDevice::init("");
+  pBLEScan = BLEDevice::getScan(); //create new scan
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
+  pBLEScan->setInterval(100);
+  pBLEScan->setWindow(99); // less or equal setInterval value
+  Serial.println("Scanner Enabled");
   //init buttons + buzzer
   pinMode(BUTTON_PRESS, INPUT_PULLUP);
   pinMode(BUTTON_LEFT, INPUT_PULLUP);
@@ -46,51 +100,22 @@ void setup(void) {
   tft.setTextSize(3);
   tft.setTextWrap(true);
   tft.println("LOADING");
+  colorWipe(strip.Color(0, 0, 255), 50);  // Green
   delay(100); //maybe do something here, otherwise just allows user to read the loading screen
-  rainbowCycle(2);    //commented the rainbow out for obvious reasons
+  colorWipe(strip.Color(0, 0, 0), 50);    // Black/off
   //animation screen
   tft.fillScreen(BLACK);
   base_circle(10, BLUE);
   outline_circle(10, WHITE);
   main_menu(); //main menu function
-  delay(500);
   tft.invertDisplay(true);
-  delay(500);
   strip.begin();
   strip.show(); // set all pixels to 'off', saves power
 }
 unsigned long chrono = 0; //Circle variable
 int i = 0; //loop var
-bool flag, select = false; //flag helps the program know not to update the screen repeatedly unless it is pressed again, select will choose whichever menu is hovered over when triggered
+bool flag, select,trackPage,track = false; //flag helps the program know not to update the screen repeatedly unless it is pressed again, select will choose whichever menu is hovered over when triggered
  //program to call when drawing the circle
-bool drawCircle (int centerX, int centerY, int rad, int timeDelay)
-{
- if (millis() - chrono < 10) return 0;
- if(timeDelay < 20){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, GREEN);
-    delay(timeDelay);
-    return 1;
-  }
-  if(timeDelay < 40 && timeDelay >= 20){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, YELLOW);
-    delay(timeDelay);
-    return 1;
-  }
-  if(timeDelay < 80 && timeDelay >= 40){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, WHITE);
-    delay(timeDelay);
-    return 1;
-  }
-  if(timeDelay < 120 && timeDelay >= 80){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, RED);
-    delay(timeDelay);
-    return 1;
-  }
-}
 void loop() { //main program loop
   bool newState = digitalRead(BUTTON_PRESS); //deboucing new state
   if (digitalRead(BUTTON_LEFT) == LOW) //moving left
@@ -118,21 +143,35 @@ void loop() { //main program loop
     newState = digitalRead(BUTTON_PRESS); //reassign new state to compare against old state
     Serial.println(!newState); //debugging
     select = !newState; //assign select bool
-    if (select == 1) { //actual select method
+    if (select == 1 && !trackPage) { //actual select method
       Serial.println("select triggered"); //debugging
       soundThree(); //new sound
       colorWipe(strip.Color(0, 0, 255), 50);  // Green
       colorWipe(strip.Color(0, 0, 0), 50);    // Black/off 
       delay(100);
       page_select(i); //short delay, then select desired page
+      
+    }
+    else if (select==1 && trackPage) {
+      track=true; //enable tracking
+      Serial.println("track enabled");
+      load_track();
     }
   }
   oldState = newState; //new debouce
   select_main(i, select); //hover function
   delay(20); //short delay
 }
+
 void select_main(int pos, int select) {
   if (pos == 0 && !flag) {
+    tft.fillScreen(BLACK);
+    tft.fillRoundRect(5, 15, 230, 70, 8, CYAN);
+    tft.fillRoundRect(10, 20, 220, 60, 8, WHITE);
+    tft.setCursor(30, 40);
+    tft.setTextColor(BLACK);
+    tft.setTextSize(2);
+    tft.println("FRISBEE TRACKER");
     Serial.println("User Hovering Above Track");
     soundOne(); //move left sound
     colorWipe(strip.Color(0, 255, 0), 50);  // Green
@@ -150,6 +189,13 @@ void select_main(int pos, int select) {
     flag = true; //trigger flag so it doesn't continously select main, otherwise it will flash uncontrollably 
   }
   else if (pos == 1 && !flag) {
+    tft.fillScreen(BLACK);
+    tft.fillRoundRect(5, 15, 230, 70, 8, CYAN);
+    tft.fillRoundRect(10, 20, 220, 60, 8, WHITE);
+    tft.setCursor(30, 40);
+    tft.setTextColor(BLACK);
+    tft.setTextSize(2);
+    tft.println("FRISBEE TRACKER");
     Serial.println("User Hovering Above About");
     soundTwo(); //move right sound
     colorWipe(strip.Color(0, 255, 0), 50);  // Green
@@ -167,6 +213,7 @@ void select_main(int pos, int select) {
     flag = true; //trigger flag so it doesn't continously select main, otherwise it will flash uncontrollably 
   }
 }
+
 void main_menu() {
   //main menu initialize
   //set main title block
@@ -178,7 +225,8 @@ void main_menu() {
   tft.setTextSize(2);
   tft.println("FRISBEE TRACKER");
   //set track menu option
-  tft.fillRoundRect(10, 90, 100, 60, 8, WHITE);
+  tft.fillRoundRect(10, 90, 100, 60, 8, BLUE);
+  tft.fillRoundRect(15, 95, 90, 50, 8, WHITE);
   tft.setCursor(30, 110);
   tft.setTextColor(GREEN);
   tft.println("Track");
@@ -203,77 +251,42 @@ void page_select(int i) {
 }
 void load_track() {  
   //Track page here
-  Serial.println("Loading Track Page");
-  chrono = millis();
-  int d = 4, radius, circleX = 120, circleY = 120, j=0;    //Setting a d variable to act as the distance variable for when we actually have the bluetooth distance working
-  if (d >= 25){
-    while (d >= 25) {         //mulitple functions to display the difference in timing intervals
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 100);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundFour();
-      j++;
-    }
-    j=0;
-  }
-  else if (d < 25 && d >= 10){
-    while (d < 25) {
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 50);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundThree();
-      j++;
-    }
-    j=0;
-  }
-  else if (d < 10 && d >= 5){
-    while (d < 10) {
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 25);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundTwo();
-      j++;
-    }
-    j=0;
-  }
-  else if (d < 5){
-    while (d < 5) {
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 10);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundOne();
-      j++;
-    }
-    j=0;
-  }
-  else{
+  if (!track) {
     tft.fillScreen(BLACK);
-    tft.setCursor(100, 120);
-    tft.setTextColor(RED);
-    tft.println("ERROR");
+    tft.fillRoundRect(5, 15, 230, 70, 8, CYAN);
+    tft.fillRoundRect(10, 20, 220, 60, 8, WHITE);
+    tft.setCursor(30, 40);
     tft.setTextColor(BLACK);
+    tft.setTextSize(2);
+    tft.println("FRISBEE TRACKER");
+    //set track menu option
+    tft.fillRoundRect(5, 100, 230, 70, 8, RED);
+    tft.fillRoundRect(10, 105, 220, 60, 8, WHITE);
+    tft.setCursor(35, 125);
+    tft.setTextColor(GREEN);
+    tft.println("Start Tracking");
+    trackPage=true;
+    Serial.println("Loading Track Page");
   }
-  
+  if (track==true){
+  tft.fillRoundRect(5, 100, 230, 70, 8, GREEN);
+  tft.fillRoundRect(10, 105, 220, 60, 8, WHITE);
+  tft.setCursor(35, 125);
+  tft.setTextColor(GREEN);
+  tft.println("Start Tracking");
+  delay(500);
+  //load ty stuff
+  while(track==true){
+  Serial.println("Tracking Started");
+  BLEScanResults foundDevices = pBLEScan->start(scanTime, false);
+  Serial.println("Scan done!");
+  pBLEScan->clearResults(); // delete results fromBLEScan buffer to release memory
+  delay(200);
+  if (digitalRead(BUTTON_PRESS) == LOW) {
+    track==false;
+  }
+  }
+  }
 }
 void load_about() { 
   //about page here
@@ -308,6 +321,34 @@ void load_about() {
   tft.setTextSize(2);         
 }
 
+bool drawCircle (int centerX, int centerY, int rad, int timeDelay)
+{
+ if (millis() - chrono < 10) return 0;
+ if(timeDelay < 20){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, GREEN);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 40 && timeDelay >= 20){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, YELLOW);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 80 && timeDelay >= 40){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, WHITE);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 120 && timeDelay >= 80){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, RED);
+    delay(timeDelay);
+    return 1;
+  }
+}
 //default sound #1
 void soundOne() {
   unsigned char i;
@@ -442,3 +483,76 @@ void outline_circle(uint8_t radius, uint16_t color) {
     }
   }
 }
+
+/*
+ * 
+  chrono = millis();
+  int radius, circleX = 120, circleY = 120, j=0;    //Setting a d variable to act as the distance variable for when we actually have the bluetooth distance working
+  if (d >= 25){
+    while (d >= 25) {         //mulitple functions to display the difference in timing intervals
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 100);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundFour();
+      j++;
+    }
+    j=0;
+  }
+  else if (d < 25 && d >= 10){
+    while (d < 25) {
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 50);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundThree();
+      j++;
+    }
+    j=0;
+  }
+  else if (d < 10){
+    while (d < 10) {
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 25);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundTwo();
+      j++;
+    }
+    j=0;
+  }
+  else if (d < 5){
+    while (d < 5) {
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 10);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundOne();
+      j++;
+    }
+    j=0;
+  }
+  else{
+    tft.fillScreen(BLACK);
+    tft.setCursor(100, 120);
+    tft.setTextColor(RED);
+    tft.println("ERROR");
+    tft.setTextColor(BLACK);
+  }
+  */
