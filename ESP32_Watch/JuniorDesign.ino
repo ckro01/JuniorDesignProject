@@ -35,6 +35,35 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NE
 Arduino_ST7789 tft = Arduino_ST7789(TFT_DC, TFT_RST, TFT_MOSI, TFT_SCLK); //for display without CS pin
 bool oldState = HIGH; //debouce bool
 int d =0;
+unsigned long chrono = 0; //Circle variable
+bool drawCircle (int centerX, int centerY, int rad, int timeDelay)
+{
+ if (millis() - chrono < 10) return 0;
+ if(timeDelay < 20){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, GREEN);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 40 && timeDelay >= 20){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, YELLOW);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 80 && timeDelay >= 40){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, WHITE);
+    delay(timeDelay);
+    return 1;
+  }
+  if(timeDelay < 120 && timeDelay >= 80){
+    chrono = millis();
+    tft.drawCircle(centerX, centerY, rad, RED);
+    delay(timeDelay);
+    return 1;
+  }
+}
 
 //distance class, do not touch :)
 //needs to go at the start, proabably best to call the draw method from here as well.
@@ -58,7 +87,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
           Serial.print(dist);
           Serial.print("m");
           d = int(dist);
-          //plug d into function to draw, also write actual distance to the user off to the side or dead center
+          display_track();
         }
       }
       
@@ -69,7 +98,69 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
     }
 };
 
-
+void display_track(){
+  chrono = millis();
+  int radius, circleX = 120, circleY = 120, j=0;    //Setting a d variable to act as the distance variable for when we actually have the bluetooth distance working
+  if (d >= 5){         //mulitple functions to display the difference in timing intervals
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 100);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundFour();
+      j++;
+    j=0;
+  }
+  else if (d < 5 && d >= 3){
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 50);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundThree();
+      j++;
+    j=0;
+  }
+  else if (d < 3 && d >=1){
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 25);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundTwo();
+      j++;
+    j=0;
+  }
+  else if (d < 1){
+      radius = 5;
+      tft.fillScreen(BLACK);
+      while (radius < 100) {
+        bool circleDrawn = drawCircle (circleX, circleY, radius, 10);
+        if (circleDrawn){
+          radius += 20;
+        } 
+      } 
+      soundOne();
+      j++;
+    j=0;
+  }
+  else{
+    tft.fillScreen(BLACK);
+    tft.setCursor(100, 120);
+    tft.setTextColor(RED);
+    tft.println("ERROR");
+    tft.setTextColor(BLACK);
+  }
+}
 
 //initialization
 void setup(void) {
@@ -112,7 +203,7 @@ void setup(void) {
   strip.begin();
   strip.show(); // set all pixels to 'off', saves power
 }
-unsigned long chrono = 0; //Circle variable
+
 int i = 0; //loop var
 bool flag, select,trackPage,track = false; //flag helps the program know not to update the screen repeatedly unless it is pressed again, select will choose whichever menu is hovered over when triggered
  //program to call when drawing the circle
@@ -321,34 +412,6 @@ void load_about() {
   tft.setTextSize(2);         
 }
 
-bool drawCircle (int centerX, int centerY, int rad, int timeDelay)
-{
- if (millis() - chrono < 10) return 0;
- if(timeDelay < 20){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, GREEN);
-    delay(timeDelay);
-    return 1;
-  }
-  if(timeDelay < 40 && timeDelay >= 20){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, YELLOW);
-    delay(timeDelay);
-    return 1;
-  }
-  if(timeDelay < 80 && timeDelay >= 40){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, WHITE);
-    delay(timeDelay);
-    return 1;
-  }
-  if(timeDelay < 120 && timeDelay >= 80){
-    chrono = millis();
-    tft.drawCircle(centerX, centerY, rad, RED);
-    delay(timeDelay);
-    return 1;
-  }
-}
 //default sound #1
 void soundOne() {
   unsigned char i;
@@ -484,75 +547,3 @@ void outline_circle(uint8_t radius, uint16_t color) {
   }
 }
 
-/*
- * 
-  chrono = millis();
-  int radius, circleX = 120, circleY = 120, j=0;    //Setting a d variable to act as the distance variable for when we actually have the bluetooth distance working
-  if (d >= 25){
-    while (d >= 25) {         //mulitple functions to display the difference in timing intervals
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 100);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundFour();
-      j++;
-    }
-    j=0;
-  }
-  else if (d < 25 && d >= 10){
-    while (d < 25) {
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 50);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundThree();
-      j++;
-    }
-    j=0;
-  }
-  else if (d < 10){
-    while (d < 10) {
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 25);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundTwo();
-      j++;
-    }
-    j=0;
-  }
-  else if (d < 5){
-    while (d < 5) {
-      radius = 5;
-      tft.fillScreen(BLACK);
-      while (radius < 100) {
-        bool circleDrawn = drawCircle (circleX, circleY, radius, 10);
-        if (circleDrawn){
-          radius += 20;
-        } 
-      } 
-      soundOne();
-      j++;
-    }
-    j=0;
-  }
-  else{
-    tft.fillScreen(BLACK);
-    tft.setCursor(100, 120);
-    tft.setTextColor(RED);
-    tft.println("ERROR");
-    tft.setTextColor(BLACK);
-  }
-  */
