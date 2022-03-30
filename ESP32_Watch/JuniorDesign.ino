@@ -127,7 +127,7 @@ void display_track(){
       j++;
     j=0;
   }
-  else if (d < 3 && d >=1){
+  else if (d < 3 && d >=1.3){
       radius = 5;
       tft.fillScreen(BLACK);
       while (radius < 100) {
@@ -140,7 +140,7 @@ void display_track(){
       j++;
     j=0;
   }
-  else if (d < 1){
+  else if (d < 1.3){
       radius = 5;
       tft.fillScreen(BLACK);
       while (radius < 100) {
